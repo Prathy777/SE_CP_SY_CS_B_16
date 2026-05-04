@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SRS Estimator — Project Cost & Timeline</title>
+  <meta name="description" content="Upload or paste your SRS document to extract keywords, estimate project cost, and generate a development timeline." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">S</div>
+      <div>
+        <div class="brand-name">SRS Estimator</div>
+        <div class="brand-sub">Project Cost & Timeline</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#inputSection" class="nav-item active" id="nav-input">
+        <span class="nav-icon">📄</span> Input
+      </a>
+      <a href="#keywordsSection" class="nav-item" id="nav-keywords">
+        <span class="nav-icon">🔑</span> Keywords
+      </a>
+      <a href="#costSection" class="nav-item" id="nav-cost">
+        <span class="nav-icon">💰</span> Cost Estimate
+      </a>
+      <a href="#timelineSection" class="nav-item" id="nav-timeline">
+        <span class="nav-icon">📅</span> Timeline
+      </a>
+      <a href="#modulesSection" class="nav-item" id="nav-modules">
+        <span class="nav-icon">🧩</span> Modules
+      </a>
+      <a href="#teamSection" class="nav-item" id="nav-team">
+        <span class="nav-icon">👥</span> Team
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-tip">💡 Tip: Paste detailed SRS text for better keyword extraction and estimates.</div>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ──────────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Page Header -->
+    <header class="page-header">
+      <h1>SRS-Based Project Estimator</h1>
+      <p>Paste your Software Requirements Specification to get automated keyword extraction, cost estimates, and a development timeline.</p>
+    </header>
+
+    <!-- ── Input Section ─────────────────────────── -->
+    <section class="section-block" id="inputSection">
+      <div class="section-title-bar">
+        <h2><span class="section-icon">📄</span> SRS Document Input</h2>
+      </div>
+
+      <div class="input-area">
+        <textarea
+          id="srsInput"
+          rows="12"
+          placeholder="Paste your SRS document here...&#10;&#10;Example: The system shall provide user authentication with JWT tokens, a real-time analytics dashboard, an AI-based recommendation engine, payment gateway integration with Razorpay, admin panel with role-based access control, and cloud storage on AWS S3..."
+        ></textarea>
+
+        <div class="input-controls-row">
+          <div class="control-field">
+            <label for="hourlyRate">Hourly Rate (₹)</label>
+            <input type="number" id="hourlyRate" value="500" step="50" min="100" max="10000" />
+          </div>
+          <div class="control-field">
+            <label for="startDate">Project Start Date</label>
+            <input type="date" id="startDate" />
+          </div>
+          <div class="control-actions">
+            <button class="btn btn-outline" id="demoBtn">Load Example</button>
+            <button class="btn btn-primary" id="estimateBtn">
+              <span id="btnText">Generate Estimate</span>
+              <span id="btnSpinner" class="hidden">⏳ Analyzing...</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Results (hidden until estimate runs) ─────── -->
+    <div id="resultsContainer" class="hidden">
+
+      <!-- Summary Stats Row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Modules Detected</div>
+          <div class="stat-value" id="statModules">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Days</div>
+          <div class="stat-value" id="statDays">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Hours</div>
+          <div class="stat-value" id="statHours">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Cost</div>
+          <div class="stat-value" id="statCost">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Complexity Score</div>
+          <div class="stat-value" id="statComplexity">--</div>
+        </div>
+      </div>
+
+      <!-- ── Keywords Section ──────────────────────── -->
+      <section class="section-block" id="keywordsSection">
+        <div class="section-title-bar">
+          <h2><span class="section-icon">🔑</span> Keyword Extraction</h2>
+          <button class="btn btn-outline btn-sm" id="toggleKeywordsBtn">Show Keywords</button>
+        </div>
+
+        <div id="keywordsContent" class="hidden">
+          <div class="keywords-grid">
+            <div class="kw-column">
+              <div class="kw-column-header">Feature Keywords</div>
+              <div class="tag-list" id="featureTags"></div>
+            </div>
+            <div class="kw-column">
+              <div class="kw-column-header">Complexity &amp; Tech Keywords</div>
+              <div class="tag-list" id="complexityTags"></div>
+            </div>
+          </div>
+
+          <div class="complexity-bar-row">
+            <span class="complexity-bar-label">Overall Complexity</span>
+            <div class="complexity-track">
+              <div class="complexity-fill" id="complexityBarFill"></div>
+            </div>
+            <span class="complexity-pct" id="complexityBarPct">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Cost Estimate Section ─────────────────── -->
+      <section class="section-block" id="costSection">
+        <div class="section-title-bar">
+          <h2><span class="section-icon">💰</span> Cost Estimate</h2>
+          <span class="section-badge" id="currencyBadge">INR</span>
+        </div>
+
+        <div class="cost-grid">
+          <div class="cost-item">
+            <div class="cost-item-label">Labor Cost</div>
+            <div class="cost-item-value" id="laborCost">--</div>
+            <div class="cost-item-sub" id="laborSub"></div>
+          </div>
+          <div class="cost-item">
+            <div class="cost-item-label">Infrastructure Cost</div>
+            <div class="cost-item-value" id="infraCost">--</div>
+          </div>
+          <div class="cost-item">
+            <div class="cost-item-label">Contingency (10%)</div>
+            <div class="cost-item-value" id="contingencyCost">--</div>
+          </div>
+          <div class="cost-item cost-item--total">
+            <div class="cost-item-label">Total Cost</div>
+            <div class="cost-item-value" id="totalCostDisplay">--</div>
+          </div>
+        </div>
+
+        <div class="cost-bar-section">
+          <div class="cost-bar-title">Cost Breakdown</div>
+          <div id="costBars"></div>
+        </div>
+      </section>
+
+      <!-- ── Timeline Section ──────────────────────── -->
+      <section class="section-block" id="timelineSection">
+        <div class="section-title-bar">
+          <h2><span class="section-icon">📅</span> Project Timeline</h2>
+          <span class="date-range-badge" id="dateRangeBadge"></span>
+        </div>
+
+        <div class="timeline-tabs">
+          <button class="tab-btn active" id="tabPhase" onclick="switchTab('phase')">SDLC Phases</button>
+          <button class="tab-btn" id="tabModule" onclick="switchTab('module')">Module Schedule</button>
+        </div>
+
+        <div id="phaseTimeline" class="timeline-view">
+          <div class="gantt-header">
+            <div class="gantt-col-name">Phase</div>
+            <div class="gantt-col-dates">Dates</div>
+            <div class="gantt-col-days">Days</div>
+            <div class="gantt-col-bar">Progress Bar</div>
+          </div>
+          <div id="phaseGantt"></div>
+        </div>
+
+        <div id="moduleTimeline" class="timeline-view hidden">
+          <div class="gantt-header">
+            <div class="gantt-col-name">Module</div>
+            <div class="gantt-col-dates">Dates</div>
+            <div class="gantt-col-days">Days</div>
+            <div class="gantt-col-bar">Schedule</div>
+          </div>
+          <div id="moduleGantt"></div>
+        </div>
+      </section>
+
+      <!-- ── Modules Section ───────────────────────── -->
+      <section class="section-block" id="modulesSection">
+        <div class="section-title-bar">
+          <h2><span class="section-icon">🧩</span> Module Breakdown</h2>
+          <span class="section-badge" id="moduleCountBadge">0 modules</span>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Module / Feature</th>
+              <th>Complexity</th>
+              <th>Multiplier</th>
+              <th>Effort (Days)</th>
+            </tr>
+          </thead>
+          <tbody id="moduleTableBody"></tbody>
+        </table>
+      </section>
+
+      <!-- ── Team Section ──────────────────────────── -->
+      <section class="section-block" id="teamSection">
+        <div class="section-title-bar">
+          <h2><span class="section-icon">👥</span> Recommended Team</h2>
+          <span class="section-badge" id="teamSizeBadge"></span>
+        </div>
+
+        <div class="team-grid" id="teamGrid"></div>
+        <p class="team-desc" id="teamDesc"></p>
+      </section>
+
+    </div><!-- /resultsContainer -->
+
+  </main>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
